@@ -1,30 +1,40 @@
 import urllib, urllib2
+import requests
 import json
 
 class powerline(object):
 
-    #base_url = "http://192.168.10.100/api"
-    base_url = "https://api-staging.powerli.ne/api"
-    username = None
-    passwd = None
-    fb_token = None     # use if facebook login test
-    fb_id = None        # use if facebook login test
-
-    def __init__(self):
+    def __init__(self, username, password, base_url):
         self.token = None
         self.group_id = None
 
-    def request(self, url, data=None):
-        return urllib2.Request(self.base_url + url, data)
+        self.username = username
+        self.password = password
+        self.base_url = base_url + "/api"
+
+    def post(self, route, data=None, h=None):
+        headers = {'Content-Type': 'application/json', 'Token' : self.token}
+        if h:
+            headers.update(h)
+        if data:
+            return requests.post(self.base_url + route, headers=headers, data=data, verify=False)
+        return requests.post(self.base_url + route, headers=headers, verify=False)
+
+    def get(self, route, h=None):
+        headers = {'Content-Type': 'application/json', 'Token' : self.token}
+        if h: headers.update(h)
+        return requests.get(self.base_url + route, headers=headers, verify=False)
+
+    def delete(self, route, h=None):
+        headers = {'Content-Type': 'application/json', 'Token' : self.token}
+        if h: headers.update(h)
+        return requests.delete(self.base_url + route, headers=headers, verify=False)
 
     def login(self):
-        auth = { 'username': self.username, 'password' : self.passwd }
-        req = self.request("/secure/login", urllib.urlencode(auth))
-        req.add_header('Content-Type','application/x-www-form-urlencoded')
-        rsp = urllib2.urlopen(req)
-        d = rsp.read()
-        self.token = json.loads(d)['token']
-        rsp.close()
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        auth = urllib.urlencode({ 'username': self.username, 'password' : self.password })
+        req = self.post("/secure/login", auth, headers)
+        self.token = req.json()['token']
         print "logged in"
 
     def fb_login(self):
@@ -40,11 +50,11 @@ class powerline(object):
     def create_user(self):
         d = {
                 'username': self.username,
-                'first_name': 'Herbie',
-                'last_name':'Hancock',
+                'first_name': '',
+                'last_name':'',
                 'password': self.passwd,
                 'confirm': self.passwd,
-                'address1':'7 Yup  Ln',
+                'address1':'7 Faith Ln',
                 'city':'Ardsley',
                 'state':'NY',
                 'country':'US',
@@ -59,28 +69,28 @@ class powerline(object):
         rsp.close()
         print "created user"
 
-    def create_group(self, d):
-        r = self.request("/groups/", json.dumps(d) )
-        r.add_header('Content-Type', 'application/json')
-        r.add_header("Token", self.token)
-        rsp = urllib2.urlopen(r)
+    def list_groups(self):
+        r = self.get("/groups/")
+        return r.json()
 
-        print rsp
-        print "create group code: ",rsp.getcode()
-        group = rsp.read()
-        self.group_id = group['id']
-        rsp.close()
+    def create_group(self, group_data):
+        r = self.post("/groups/", group_data)
+        #self.group_id = r.json()['id']
+        print r.json()
+        print "Create group status: ",r.status_code
+        print
         return self.group_id
 
-    def join_group(self, gid, data):
-        r = self.request("/groups/join/{gid:d}".format(gid=gid), json.dumps(data) )
-        r.add_header('Content-Type', 'application/json')
-        r.add_header("Token", self.token)
-        rsp = urllib2.urlopen(r)
-        print "join group code: ",rsp.getcode()
+    def join_group(self, gid, data=None):
+        r = self.post("/groups/join/{gid:d}".format(gid=gid), data )
+        print r.json()
+
+    def unjoin_group(self, gid):
+        r = self.delete("/groups/join/{gid:d}".format(gid=gid))
+        print r.json()
 
     def create_micropetition(self, d):
-        r = self.request("/micro-petitions", json.dumps(d) )
+        r = self.post("/micro-petitions", json.dumps(d) )
         r.add_header('Content-Type', 'application/json')
         r.add_header("Token", self.token)
         rsp = urllib2.urlopen(r)
