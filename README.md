@@ -15,6 +15,28 @@ interface.
 
 For now, all unit tests should extend `powerlineusertest.PowerlineUserTests`
 
+## PowerlineUserTests
+
+This is the base class for all tests. It handles the basic class execution setup to make the tests work.
+It assumes the file `powerline.cfg` is present in the running directly
+
+### powerline.cfg
+
+Example:
+
+```
+[user]
+username: test
+password: pass
+url     : https://api-dev.powerli.ne
+
+[mysql]
+host    : civix
+dbname  : civix
+user    : civix
+password: civix
+```
+
 ## User Tests
 
 All user tests are for testing the capabilities of a standard user
