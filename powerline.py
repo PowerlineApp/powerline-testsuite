@@ -13,6 +13,7 @@ class powerline(object):
         self.base_url = base_url + "/api"
 
     def post(self, route, data=None, h=None):
+        """ POST request """
         headers = {'Content-Type': 'application/json', 'Token' : self.token}
         if h:
             headers.update(h)
@@ -21,23 +22,29 @@ class powerline(object):
         return requests.post(self.base_url + route, headers=headers, verify=False)
 
     def get(self, route, h=None):
+        """ GET request """
         headers = {'Content-Type': 'application/json', 'Token' : self.token}
         if h: headers.update(h)
         return requests.get(self.base_url + route, headers=headers, verify=False)
 
     def delete(self, route, h=None):
+        """ DELETE request """
         headers = {'Content-Type': 'application/json', 'Token' : self.token}
         if h: headers.update(h)
         return requests.delete(self.base_url + route, headers=headers, verify=False)
 
     def login(self):
+        """ Primary login """
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         auth = urllib.urlencode({ 'username': self.username, 'password' : self.password })
         req = self.post("/secure/login", auth, headers)
         self.token = req.json()['token']
-        print "logged in"
 
     def fb_login(self):
+        """ facebook login
+
+            NEEDS UPDATE """
+
         auth = { 'facebook_token': self.fb_token, 'facebook_id' : self.fb_id }
         req = self.request("/secure/facebook/login", urllib.urlencode(auth))
         req.add_header('Content-Type','application/x-www-form-urlencoded')
@@ -45,7 +52,7 @@ class powerline(object):
         d = rsp.read()
         self.token = json.loads(d)['token']
         rsp.close()
-        print "logged in"
+        return d
 
     def create_user(self):
         d = {
@@ -67,7 +74,7 @@ class powerline(object):
         d = rsp.read()
         self.token = json.loads(d)['token']
         rsp.close()
-        print "created user"
+        return d
 
     def list_groups(self):
         r = self.get("/groups/")
