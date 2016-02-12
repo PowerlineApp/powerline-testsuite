@@ -21,11 +21,14 @@ class powerline(object):
             return requests.post(self.base_url + route, headers=headers, data=data, verify=False)
         return requests.post(self.base_url + route, headers=headers, verify=False)
 
-    def get(self, route, h=None):
+    def get(self, route, h=None, params=None):
         """ GET request """
+        kwargs = {}
         headers = {'Content-Type': 'application/json', 'Token' : self.token}
         if h: headers.update(h)
-        return requests.get(self.base_url + route, headers=headers, verify=False)
+        if params:
+            kwargs['params'] = params
+        return requests.get(self.base_url + route, headers=headers, verify=False, **kwargs)
 
     def delete(self, route, h=None):
         """ DELETE request """
