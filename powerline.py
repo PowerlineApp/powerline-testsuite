@@ -42,6 +42,7 @@ class powerline(object):
         auth = urllib.urlencode({ 'username': self.username, 'password' : self.password })
         req = self.post("/secure/login", auth, headers)
         self.token = req.json()['token']
+        return self.token
 
     def fb_login(self):
         """ facebook login
