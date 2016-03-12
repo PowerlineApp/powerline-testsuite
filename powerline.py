@@ -31,11 +31,15 @@ class powerline(object):
             kwargs['params'] = params
         return requests.get(self.base_url + route, headers=headers, verify=False, **kwargs)
 
-    def delete(self, route, h=None):
+    def delete(self, route, data=None, h=None):
         """ DELETE request """
+        kwargs = {}
         headers = {'Content-Type': 'application/json', 'Token' : self.token}
-        if h: headers.update(h)
-        return requests.delete(self.base_url + route, headers=headers, verify=False)
+        if h:
+            headers.update(h)
+        if data:
+            kwargs['data'] = data
+        return requests.delete(self.base_url + route, headers=headers, verify=False, **kwargs)
 
     def login(self):
         """ Primary login """
@@ -89,6 +93,39 @@ class powerline(object):
         self.token = json.loads(d)['token']
         rsp.close()
         return d
+
+    def group_users(self, gid):
+        """ Group's users """
+        r = self.get("/groups/{g:d}/users".format(g=gid))
+        return r.json()
+
+    def group_invite_approvals(self, status, gid):
+        """ group invite status """
+        statuses = ["reject", "approve" ]
+        if status not in statuses:
+            raise Exception("Unknown status request for invites")
+        r = self.post("/groups/invites/{s:s}/{g:d}".format(s=status, g=gid))
+        print r
+
+    def group_required_fields(self, gid):
+        """ Group's required fields"""
+        r = self.get("/groups/{g:d}/fields".format(g=gid))
+        return r.json()
+
+    def group_invites(self, gid):
+        """ Group invites """
+        r = self.get("/groups/invites")
+        return r.json()
+
+    def group_info(self, gid):
+        """ Info about a group """
+        r = self.get("/groups/info/{g:d}".format(g=gid))
+        return r.json()
+
+    def user_groups(self):
+        """ Get user's groups """
+        r = self.get("/groups/user-groups")
+        return r.json()
 
     def list_groups(self):
         """ List all groups """
