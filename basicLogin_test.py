@@ -1,5 +1,9 @@
+#!/usr/bin/env python
 
 # BASIC USER LOGIN TEST
+#
+# This is also a quick example of how to handle
+# a unit test and use the powerline test api
 
 import powerline
 import unittest
@@ -20,5 +24,12 @@ class BasicUserLoginTest(unittest.TestCase):
         self.url = config.get(USER_SEC, 'url')
 
     def test_login(self):
+        """ Basic login test """
         api = powerline.powerline(self.username, self.password, self.url)
-        self.assertTrue( api.login() )
+        token = api.login()
+        self.assertTrue( token )
+
+if __name__ == "__main__":
+    suite = unittest.TestSuite()
+    suite.addTest(BasicUserLoginTest("test_login"))
+    unittest.TextTestRunner(verbosity=2).run(suite)
